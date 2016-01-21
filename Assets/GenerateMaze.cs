@@ -4,12 +4,14 @@ using System.Collections;
 public class GenerateMaze : MonoBehaviour {
 
 	int n, m, x, z, cubos;
-	bool copaCreada;
+	bool copaCreada, harry, cedric;
 	string stringToEdit = "Hello World";
+	int[,] muros;
 	// Use this for initialization
 	private void Awake () {
 		n = 50;
 		m = 50;
+		muros = new int[n+1, m+1]; 
 	}
 	
 	// Update is called once per frame
@@ -34,12 +36,20 @@ public class GenerateMaze : MonoBehaviour {
 					cube.AddComponent<BoxCollider> ();
 					cube.name = name;
 					cubos++;
-				} else if (Random.value <= 0.2 && !copaCreada && cubos>=300) {			//Esa condición de los 300, no va funcionar
+					Debug.Log (i + " " + j);
+					muros [i, j] = 1;
+				} else if (Random.value >= 0.8 && !harry) {
+				
+				} else if (Random.value >= 0.8 && !harry) {
+
+				} else if (Random.value <= 0.2 && !copaCreada && cubos >= 300) {			//Esa condición de los 300, no va funcionar
 					GameObject copa = GameObject.CreatePrimitive (PrimitiveType.Sphere);
 					copa.transform.position = new Vector3 (0 + x, 0, 0 + z);
 					copa.AddComponent<SphereCollider> ();
 					copaCreada = true;
+					muros [i, j] = 2;
 				}
+				muros [i, j] = 0;
 				z++;
 			}
 			z = 0;
