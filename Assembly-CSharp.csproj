@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Cedric.cs" />
      <Compile Include="Assets\GenerateMaze.cs" />
      <Compile Include="Assets\controller.cs" />
  <Reference Include="UnityEngine.UI">
