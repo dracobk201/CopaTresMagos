@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class GenerateMaze : MonoBehaviour {
@@ -6,8 +7,9 @@ public class GenerateMaze : MonoBehaviour {
     public Cedric cedric;
 
 	public int n, m, x, z, cubos;
-	bool copaCreada, harry, cedricBool;
-	string stringToEdit = "Hello World";
+	bool copaCreada, cedricBool,MazeRunner;
+	bool muestra = true;
+	float t;
 
     [HideInInspector]
     /// <summary>
@@ -25,66 +27,36 @@ public class GenerateMaze : MonoBehaviour {
     int[] desplazamientosX = new int[] { 1, 0, -1, 0 };
     int[] desplazamientosY = new int[] { 0, 1, 0, -1 };
 
-    public GameObject copaGameObject;
+    public GameObject copaGameObject, canvas;
+	public GameObject[] textosCanvas = new GameObject[5];
+	public Material wallTexture;
+
+	//Esto era para usar los inputfield del canvas
+	//public GameObject nMaze;
+	//public GameObject mMaze;
+	//public GameObject tMaze;
+	[HideInInspector] public string nMaze = "10";
+	[HideInInspector] public string mMaze = "10";
+	[HideInInspector] public string tMaze = "0";
 
 	// Use this for initialization
 	private void Awake () {
-        n = 50;
-		m = 50;
-        muros = new int[n + 1, m + 1];
-        visitados = new bool[n, m];
+		canvas = GameObject.FindGameObjectWithTag ("UI");
 	}
 	
 	// Update is called once per frame
-	private void Start () {
-		//Crear ();
-        Crear2();
-		Debug.Log (cubos);
-		//float var = n * m;
-		//if (var
+	private void Update () {
+		if (Input.GetKeyDown (KeyCode.E) && !MazeRunner) {
+			Asignaciones ();
+			CrearLaberinto ();
 
-        Punto2D posicionCedric = getPosicionAleatoriayLibre();
-        Debug.Log(" posicionCedric " + posicionCedric);
-        Punto2D posicionCopa = getPosicionAleatoriayLibre();
-        Debug.Log(" posicionCopa " + posicionCopa);
+			Punto2D posicionCedric = getPosicionAleatoriayLibre ();
+			Debug.Log (" posicionCedric " + posicionCedric);
+			Punto2D posicionCopa = getPosicionAleatoriayLibre ();
+			Debug.Log (" posicionCopa " + posicionCopa);
 
-        copaGameObject.transform.position = new Vector3(posicionCopa.x, 0, posicionCopa.y);
-        cedric.CalcularRuta(posicionCedric, posicionCopa);
-	}
-
-	void OnGUI(){
-		stringToEdit = GUI.TextField (new Rect (10, 10, 200, 20), stringToEdit, 25);
-	}
-	private void Crear(){
-		for (int i = 0; i <= n; i++) {
-			for (int j = 0; j <= m; j++) {
-				string name = "cube" + i+"-"+j;
-                muros [i, j] = 0;
-				if (Random.value <= 0.33) {
-					GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
-					cube.transform.position = new Vector3 (0 + x, 0, 0 + z);
-					cube.transform.localScale = new Vector3 (1, 3, 1);
-					cube.AddComponent<BoxCollider> ();
-					cube.name = name;
-					cubos++;
-					Debug.Log (i + " " + j);
-					muros [i, j] = 1;
-				} else if (Random.value >= 0.8 && !harry) {
-				
-				} else if (Random.value >= 0.8 && !harry) {
-
-                } /*else if (Random.value <= 0.2 && !copaCreada && cubos >= 300) {			//Esa condición de los 300, no va funcionar
-                    GameObject copa = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-                    copa.transform.position = new Vector3 (0 + x, 0, 0 + z);
-                    copa.AddComponent<SphereCollider> ();
-                    copaCreada = true;
-                    muros [i, j] = 2;
-                }*/
-				
-				z++;
-			}
-			z = 0;
-			x++;
+			copaGameObject.transform.position = new Vector3 (posicionCopa.x, 0, posicionCopa.y);
+			cedric.CalcularRuta (posicionCedric, posicionCopa);
 		}
 	}
 
@@ -130,7 +102,7 @@ public class GenerateMaze : MonoBehaviour {
     }
 
 
-    private void Crear2()
+    private void CrearLaberinto()
     {
         // Se inicializa el mapa.
         for (int i = 0; i < n; i++)
@@ -156,9 +128,9 @@ public class GenerateMaze : MonoBehaviour {
                     cube.transform.position = new Vector3(0 + x, 0, 0 + z);
                     cube.transform.localScale = new Vector3(1, 3, 1);
                     cube.AddComponent<BoxCollider>();
+					cube.GetComponent<Renderer>().material = wallTexture;
                     cube.name = name;
                     cubos++;
-                    //Debug.Log(i + " " + j);
                 }
                 z++;
             }
@@ -197,6 +169,29 @@ public class GenerateMaze : MonoBehaviour {
             }
         }
     }
+
+	void OnGUI() {
+		if (muestra) {
+			nMaze = GUI.TextField (new Rect (5, 40, 35, 20), nMaze, 3);
+			mMaze = GUI.TextField (new Rect (5, 104, 35, 20), mMaze, 3);
+			tMaze = GUI.TextField (new Rect (5, 184, 35, 20), tMaze, 3);
+		}
+	}
+
+	void Asignaciones(){
+		//Esto era para usar los InputField del canvas
+		/*n = int.Parse(nMaze.GetComponent<Text> ().text);
+		m = int.Parse(mMaze.GetComponent<Text> ().text);
+		n = int.Parse(tMaze.GetComponent<Text> ().text);*/
+		n = int.Parse(nMaze);
+		m = int.Parse(mMaze);
+		t = float.Parse(tMaze);
+		muros = new int[n + 1, m + 1];
+		visitados = new bool[n, m];
+		muestra = false;
+		MazeRunner = true;
+		canvas.SetActive (false);
+	}
 }
 
 public struct Punto2D
