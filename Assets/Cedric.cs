@@ -9,6 +9,7 @@ public class Cedric : MonoBehaviour {
 
     public Punto2D posicionCedric;
 
+    Rigidbody rb;
 
     struct PosicionMapa
     {
@@ -36,9 +37,15 @@ public class Cedric : MonoBehaviour {
         moviendo = false;
         caminoACopa = new List<Punto2D>();
 
+        rb = GetComponent<Rigidbody>();
         StartCoroutine(MoverCedric());
 	}
 	
+    public Punto2D GetPosicionCedric()
+    {
+        return posicionCedric;
+    }
+
 	// Update is called once per frame
 	void Update () {
         if (!moviendo)
@@ -53,23 +60,75 @@ public class Cedric : MonoBehaviour {
     {
         while (true)
         {
-            if (!moviendo || caminoACopa.Count == 0)
+            if (!moviendo || caminoACopa.Count < 2)
             {
                 yield return null; 
                 continue;
             }
 
-            yield return new WaitForSeconds(0.5f);
 
-            SetPosicionCedric(caminoACopa[casillaActual].x, caminoACopa[casillaActual].y);
-            casillaActual++;
+            if (casillaActual >= caminoACopa.Count || caminoACopa.Count == 0)
+            {
+                if (caminoACopa.Count == 0)
+                {
+                    Debug.Log("CalcularRuta dentro de mover");
+                    CalcularRuta(posicionCedric, maze.copaPos);
+                    if (caminoACopa.Count == 0)
+                    {
+                        yield return null;
+                        continue;
+                    }
+                }
+                yield return null; 
+                continue;
+            }
+            yield return new WaitForSeconds(0.25f);
 
             if (casillaActual >= caminoACopa.Count)
             {
+                Debug.LogError("index fuera del rango " + casillaActual + " ; " + caminoACopa.Count);
+
+                yield return null;
+                continue;
+            }
+
+            Punto2D posicionAnterior = posicionCedric;
+            Punto2D posicionNueva = caminoACopa[casillaActual];
+            casillaActual++;
+
+            if (posicionNueva.x == maze.copaPos.x && posicionNueva.y == maze.copaPos.y)
+            {
+                SetPosicionCedric(posicionNueva.x, posicionNueva.y);
+                moviendo = false;
+                yield return null;
+                continue;
+            }
+
+            maze.moverJugador(posicionAnterior, posicionNueva, 4);
+            SetPosicionCedric(posicionNueva.x, posicionNueva.y);
+
+            if (casillaActual >= caminoACopa.Count)
+            {
+
                 break;
             }
+
         }
         yield return null;
+    }
+    public bool isNoHayCamino()
+    {
+        return caminoACopa.Count == 0;
+    }
+    public bool isDebemosRecalcularRuta(Punto2D nuevaPared)
+    {
+        if (caminoACopa.Count == 0) return true;
+        for (int i = casillaActual; i < caminoACopa.Count; i++)
+        {
+            if (caminoACopa[i].x == nuevaPared.x && caminoACopa[i].y == nuevaPared.y)
+                return true;
+        }
+        return false;
     }
 
     public void SetPosicionCedric(int x, int y)
@@ -80,19 +139,19 @@ public class Cedric : MonoBehaviour {
         transform.position = new Vector3(x, 0, y);
     }
 
-    public void CalcularRuta(Punto2D posicion, Punto2D copa)
+    public void CalcularRuta(Punto2D posicionIncial, Punto2D copa)
     {
         moviendo = false;
-        DoBFS(posicion.x, posicion.y, copa.x, copa.y);
+        DoBFS(posicionIncial.x, posicionIncial.y, copa.x, copa.y);
         casillaActual = 0;
-        SetPosicionCedric(posicion.x, posicion.y);
+        SetPosicionCedric(posicionIncial.x, posicionIncial.y);
 
         Debug.Log("longitud camino " + caminoACopa.Count);
 
-        for (int i = 0; i < caminoACopa.Count; i++)
-        {
-            Debug.Log("punto " + caminoACopa[i]);
-        }
+        //for (int i = 0; i < caminoACopa.Count; i++)
+        //{
+        //    Debug.Log("punto " + caminoACopa[i]);
+        //}
 
         moviendo = true;
     }
@@ -122,12 +181,12 @@ public class Cedric : MonoBehaviour {
         while (q.Count > 0)
         {
             PosicionMapa posActual = q.Dequeue();
-            Debug.LogWarning("recorriendo pos " + posActual);
+            //Debug.LogWarning("recorriendo pos " + posActual);
             if (posActual.posicion.x == posCopaX && posActual.posicion.y == posCopaY)
             {
                 //Enconttramos el camino a al copa. Guardamos la ruta.
                 caminoACopa = new List<Punto2D>(posActual.camino);
-                break;
+                return;
             }
 
             for (int i = 0; i < 4; i++)
@@ -137,7 +196,7 @@ public class Cedric : MonoBehaviour {
 
                 if (nuevoX >= 0 && nuevoX < maze.n && nuevoY >= 0 && nuevoY < maze.m)
                 {
-                    if (maze.muros[nuevoX, nuevoY] != 1 && !visitados[nuevoX, nuevoY])
+                    if ((maze.muros[nuevoX, nuevoY] == 0 || maze.muros[nuevoX, nuevoY] == 2) && !visitados[nuevoX, nuevoY])
                     {
                         visitados[nuevoX, nuevoY] = true;
 
@@ -153,5 +212,7 @@ public class Cedric : MonoBehaviour {
                 }
             }
         }
+
+        caminoACopa.Clear();
     }
 }
