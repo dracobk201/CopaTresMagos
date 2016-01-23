@@ -14,11 +14,10 @@ public class Cedric : MonoBehaviour {
     struct PosicionMapa
     {
         public Punto2D posicion;
-        public int cantidadPasos;
         public List<Punto2D> camino;
         public override string ToString()
         {
-            return posicion.ToString() + "\n cantidadPasos " + cantidadPasos;
+            return posicion.ToString();
         }
     }
 
@@ -100,6 +99,8 @@ public class Cedric : MonoBehaviour {
             {
                 SetPosicionCedric(posicionNueva.x, posicionNueva.y);
                 moviendo = false;
+                //aqui.
+                GameMaster.instance.winCondition = 2; //Gana Cedric
                 yield return null;
                 continue;
             }
@@ -144,7 +145,7 @@ public class Cedric : MonoBehaviour {
         moviendo = false;
         DoBFS(posicionIncial.x, posicionIncial.y, copa.x, copa.y);
         casillaActual = 0;
-        SetPosicionCedric(posicionIncial.x, posicionIncial.y);
+        //SetPosicionCedric(posicionIncial.x, posicionIncial.y);
 
         Debug.Log("longitud camino " + caminoACopa.Count);
 
@@ -171,7 +172,6 @@ public class Cedric : MonoBehaviour {
         PosicionMapa posInicial = new PosicionMapa();
         posInicial.posicion.x = x;
         posInicial.posicion.y = y;
-        posInicial.cantidadPasos = 0;
         posInicial.camino = new List<Punto2D>();
         posInicial.camino.Add(new Punto2D(x, y));
 
@@ -196,14 +196,14 @@ public class Cedric : MonoBehaviour {
 
                 if (nuevoX >= 0 && nuevoX < maze.n && nuevoY >= 0 && nuevoY < maze.m)
                 {
-                    if ((maze.muros[nuevoX, nuevoY] == 0 || maze.muros[nuevoX, nuevoY] == 2) && !visitados[nuevoX, nuevoY])
+                    //if ((maze.muros[nuevoX, nuevoY] == 0 || maze.muros[nuevoX, nuevoY] == 2) && !visitados[nuevoX, nuevoY])
+                    if ((maze.muros[nuevoX, nuevoY] != 1) && !visitados[nuevoX, nuevoY])
                     {
                         visitados[nuevoX, nuevoY] = true;
 
                         PosicionMapa nuevaPos = new PosicionMapa();
                         nuevaPos.posicion.x = nuevoX;
                         nuevaPos.posicion.y = nuevoY;
-                        nuevaPos.cantidadPasos = posActual.cantidadPasos + 1;
                         nuevaPos.camino = new List<Punto2D>(posActual.camino);
                         nuevaPos.camino.Add(nuevaPos.posicion);
 

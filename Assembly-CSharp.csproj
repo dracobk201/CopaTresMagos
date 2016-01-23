@@ -45,9 +45,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Cedric.cs" />
-     <Compile Include="Assets\GenerateMaze.cs" />
-     <Compile Include="Assets\controller.cs" />
+     <Compile Include="Assets\Scripts\Cedric.cs" />
+     <Compile Include="Assets\Scripts\GameMaster.cs" />
+     <Compile Include="Assets\Scripts\GenerateMaze.cs" />
+     <Compile Include="Assets\Scripts\controller.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

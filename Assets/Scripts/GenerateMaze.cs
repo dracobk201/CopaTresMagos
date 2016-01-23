@@ -3,8 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class GenerateMaze : MonoBehaviour {
-    
+
     public Cedric cedric;
+    public controller harryPower;
 
 	public int n, m, x, z, cubos;
 	bool copaCreada, cedricBool,MazeRunner;
@@ -33,8 +34,7 @@ public class GenerateMaze : MonoBehaviour {
     int[] desplazamientosX = new int[] { 1, 0, -1, 0 };
     int[] desplazamientosY = new int[] { 0, 1, 0, -1 };
 
-    public GameObject copaGameObject, canvas;
-	public GameObject[] textosCanvas = new GameObject[5];
+    public GameObject copaGameObject;
 	public Material wallTexture;
 
 	//Esto era para usar los inputfield del canvas
@@ -47,7 +47,7 @@ public class GenerateMaze : MonoBehaviour {
 
 	// Use this for initialization
 	private void Awake () {
-		canvas = GameObject.FindGameObjectWithTag ("UI");
+		GameMaster.instance.canvas = GameObject.FindGameObjectWithTag ("UI");
 	}
 	
 	// Update is called once per frame
@@ -60,21 +60,23 @@ public class GenerateMaze : MonoBehaviour {
             Debug.Log(" posicionCopa " + posicionCopa);
 
             muros[posicionCopa.x, posicionCopa.y] = 2;
+			copaGameObject.transform.position = new Vector3 (posicionCopa.x, 0, posicionCopa.y);
 
             //Posicion de Harry
             Punto2D posicionHarry = getPosicionAleatoriayLibre();
             Debug.Log(" posicionHarry " + posicionHarry);
 
             muros[posicionHarry.x, posicionHarry.y] = 3;
+            harryPower.SetPosicion(posicionHarry.x, posicionHarry.y);
 
 			Punto2D posicionCedric = getPosicionAleatoriayLibre ();
 			Debug.Log (" posicionCedric " + posicionCedric);
 
+            cedric.SetPosicionCedric(posicionCedric.x, posicionCedric.y);
             muros[posicionCedric.x, posicionCedric.y] = 4;
 
             copaPos = posicionCopa;
 
-			copaGameObject.transform.position = new Vector3 (posicionCopa.x, 0, posicionCopa.y);
 			cedric.CalcularRuta (posicionCedric, posicionCopa);
 
             StartCoroutine(Evolucion());
@@ -103,7 +105,8 @@ public class GenerateMaze : MonoBehaviour {
 
     public bool isPosicionLibre(int x, int y)
     {
-        return muros[x, y] == 0;
+        return muros[x, y] != 1;
+        //return muros[x, y] == 0;
     }
 
 
@@ -245,8 +248,8 @@ public class GenerateMaze : MonoBehaviour {
 	void OnGUI() {
 		if (muestra) {
 			nMaze = GUI.TextField (new Rect (5, 40, 35, 20), nMaze, 3);
-			mMaze = GUI.TextField (new Rect (5, 104, 35, 20), mMaze, 3);
-			tMaze = GUI.TextField (new Rect (5, 184, 35, 20), tMaze, 3);
+			mMaze = GUI.TextField (new Rect (5, 200, 35, 20), mMaze, 3);
+			tMaze = GUI.TextField (new Rect (5, 364, 35, 20), tMaze, 3);
 		}
 	}
 
@@ -277,12 +280,12 @@ public class GenerateMaze : MonoBehaviour {
             }
             else if (muros[punto.x, punto.y] == 1)
             {
-                //se elimina una pared
+                //se elimina una pared.
                 Destroy(murosGameObjects[punto.x, punto.y]);
                 muros[punto.x, punto.y] = 0;
 
                 if (cedric.isNoHayCamino()) { 
-                cedric.CalcularRuta(cedric.GetPosicionCedric(), copaPos);
+                    cedric.CalcularRuta(cedric.GetPosicionCedric(), copaPos);
                 }
             }
         }
@@ -301,7 +304,7 @@ public class GenerateMaze : MonoBehaviour {
         murosGameObjects = new GameObject[n, m];
 		muestra = false;
 		MazeRunner = true;
-		canvas.SetActive (false);
+        GameMaster.instance.canvas.SetActive (false);
 	}
 }
 

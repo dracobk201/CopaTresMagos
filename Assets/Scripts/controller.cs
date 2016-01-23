@@ -10,7 +10,12 @@ public class controller : MonoBehaviour {
 	void Start () {
 		rb = GetComponent<Rigidbody> ();
 	}
-	
+
+    public void SetPosicion(int x, int y)
+    {
+        transform.position = new Vector3(x, 0, y);
+    }
+
 	// Update is called once per frame
 	void Update () {
         int paso = 1;
@@ -61,5 +66,27 @@ public class controller : MonoBehaviour {
 
         //float velo = (transform.position - positionActual).magnitude / Time.deltaTime;
         //Debug.LogWarning("velo " + velo);
+
+        
 	}
+
+    void LateUpdate()
+    {
+        ControlesEscena();
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Copa"))
+        {
+            GameMaster.instance.winCondition = 1;
+        }
+    }
+
+    private void ControlesEscena()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
+        if (Input.GetKeyDown(KeyCode.P))
+            Application.LoadLevel("Maze");
+    }
 }
