@@ -14,7 +14,8 @@ public class GenerateMaze : MonoBehaviour {
 
     [HideInInspector]
     /// <summary>
-    /// Representa el mapa. Los valores posibles son
+    /// Representa el mapa de tamaño n x m. Los valores posibles
+    /// para cada casilla son
     /// 0 = espacio libre
     /// 1 = pared
     /// 2 = copa
@@ -97,12 +98,25 @@ public class GenerateMaze : MonoBehaviour {
         return punto;
     }
 
-
+    /// <summary>
+    /// Devuelve si la coordenada x y está dentro de
+    /// las coordenadas del mapa
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public bool isDentroDelMapa(int x, int y)
     {
         return x >= 0 && x < n && y >= 0 && y < m;
     }
 
+    /// <summary>
+    /// Devuelve verdadero si la posición x y está libre.
+    /// (es decir cualquier cosa que no sea una pared)
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public bool isPosicionLibre(int x, int y)
     {
         return muros[x, y] != 1;
@@ -141,20 +155,24 @@ public class GenerateMaze : MonoBehaviour {
         return punto;
     }
 
+    /// <summary>
+    /// Mueve un jugador de una posición a otra.
+    /// </summary>
+    /// <param name="posicionAnterior">Posición actual.</param>
+    /// <param name="posicionNueva">Posición nueva.</param>
+    /// <param name="tipoJugador">Indicar si es Harry o Cedric</param>
     public void moverJugador(Punto2D posicionAnterior, Punto2D posicionNueva, int tipoJugador)
     {
         muros[posicionAnterior.x, posicionAnterior.y] = 0;
-        muros[posicionAnterior.x, posicionAnterior.y] = 0;
 
-        muros[posicionNueva.x, posicionNueva.y] = tipoJugador;
         muros[posicionNueva.x, posicionNueva.y] = tipoJugador;
     }
 
     /// <summary>
-    /// Devuelve una permutación de direcciones a partir de 4
+    /// Devuelve una permutación de direcciones de forma aleatoria, a partir de 4
     /// coordenadas (Este, Sur, Oeste, Norte).
     /// </summary>
-    /// <returns></returns>
+    /// <returns>El arreglo de direcciones</returns>
     int[] permutarDirecciones()
     {
         int[] direcciones = new int[] { 0, 1, 2, 3 };//ESTE, SUR, OESTE, NORTE
@@ -176,6 +194,7 @@ public class GenerateMaze : MonoBehaviour {
     private void CrearLaberinto()
     {
         // Se inicializa el mapa.
+        // Se asume que el mapa está lleno de paredes.
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < m; j++)
@@ -214,6 +233,18 @@ public class GenerateMaze : MonoBehaviour {
         }        
     }
 
+    /// <summary>
+    /// Método que se encarga de generar un laberinto usando un recorrido en profundidad
+    /// (DFS). Inicialmente el mapa está lleno de paredes y a partir de una posición se abrirá camino progresivamente, 
+    /// con cada cada llamada al método.
+    /// 
+    /// Dada una posición x,y se verifica con sus 4 puntos cardinales si se puede crear un nuevo camino hacia esa
+    /// nueva dirección. En caso de ser válido se invoca nuevamente al método con esta nueva coordenada.
+    /// 
+    /// Estos 4 puntos cardinales son tomados de forma aleatoria en vez de tomar siempre el mismo patrón.
+    /// </summary>
+    /// <param name="x">Coordenada x dentro del mapa</param>
+    /// <param name="y">Coordenada y dentro del mapa</param>
     private void DoDFS(int x, int y)
     {
         int n2 = n;
@@ -232,19 +263,24 @@ public class GenerateMaze : MonoBehaviour {
                 nuevoX_2 >= 0 && nuevoX_2 < n2 && nuevoY_2 >= 0 && nuevoY_2 < m2)
 
             {
-                if (!visitados[nuevoX_2, nuevoY_2])
+                if (!visitados[nuevoX_2, nuevoY_2]) // Se verifica que la nueva posición no haya sido visitada/procesada, para evitar ciclos en el recorrido.
                 {
                     muros[nuevoX, nuevoY] = 0;
                     muros[nuevoX_2, nuevoY_2] = 0;
 
                     visitados[nuevoX, nuevoY] = true;
                     visitados[nuevoX_2, nuevoY_2] = true;
+
+                    //Se invoca recursivamente a la función.
                     DoDFS(nuevoX_2, nuevoY_2);
                 }
             }
         }
     }
 
+    /// <summary>
+    /// Método que permite modificar los parámetros de entrada.
+    /// </summary>
 	void OnGUI() {
 		if (muestra) {
 			nMaze = GUI.TextField (new Rect (5, 40, 35, 20), nMaze, 3);
@@ -253,10 +289,15 @@ public class GenerateMaze : MonoBehaviour {
 		}
 	}
 
+    /// <summary>
+    /// Co-rutina para evolucionar el mapa de forma aleatoria.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator Evolucion()
     {
         while (true)
         {
+            //Después de cada t segundos intercambiar una pared por un piso o viceversa.
             yield return new WaitForSeconds(t);
 
             Punto2D punto = getPosicionEvolucion();
@@ -273,7 +314,7 @@ public class GenerateMaze : MonoBehaviour {
                 murosGameObjects[punto.x, punto.y] = cube;
                 muros[punto.x, punto.y] = 1;
 
-                if (cedric.isDebemosRecalcularRuta(punto)) {
+                if (cedric.isDebemosRecalcularRuta(punto)) { //Si la pared está en el recorrido de cedric debemos recalcular su camino mínimo.
                     Debug.LogError("recalculando...");
                     cedric.CalcularRuta(cedric.GetPosicionCedric(), copaPos);
                 }

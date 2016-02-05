@@ -26,9 +26,16 @@ public class Cedric : MonoBehaviour {
     int[] desplazamientosX = new int[] { 1, 0, -1, 0 };
     int[] desplazamientosY = new int[] { 0, 1, 0, -1 };
 
+    /// <summary>
+    /// Contiene la ruta (secuencia de puntos) de cedric hacia la copa.
+    /// </summary>
     List<Punto2D> caminoACopa;
 
+    /// <summary>
+    /// Índice que representa la casilla actual de cedric dentro de su ruta.
+    /// </summary>
     int casillaActual = -1;
+
     bool moviendo;
 
     void Start()
@@ -54,7 +61,10 @@ public class Cedric : MonoBehaviour {
 
 
 	}
-
+    /// <summary>
+    /// Co-rutina que traslada a cedric hacia copa.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator MoverCedric()
     {
         while (true)
@@ -117,10 +127,22 @@ public class Cedric : MonoBehaviour {
         }
         yield return null;
     }
+
+    /// <summary>
+    /// Devuelve true si no existe camino de cedric a la copa.
+    /// </summary>
+    /// <returns></returns>
     public bool isNoHayCamino()
     {
         return caminoACopa.Count == 0;
     }
+
+    /// <summary>
+    /// Dada una posición x,y se devuelve true si esta posición está contenida
+    /// en el camino de cedric a la copa.
+    /// </summary>
+    /// <param name="nuevaPared">La posición x,y a verificar</param>
+    /// <returns>True si hay que recalcular la ruta de cedric hacia la copa.</returns>
     public bool isDebemosRecalcularRuta(Punto2D nuevaPared)
     {
         if (caminoACopa.Count == 0) return true;
@@ -140,6 +162,11 @@ public class Cedric : MonoBehaviour {
         transform.position = new Vector3(x, 0, y);
     }
 
+    /// <summary>
+    /// Este método es usado para calcular la ruta de cedric a la copa.
+    /// </summary>
+    /// <param name="posicionIncial">Posición actual de Cedric</param>
+    /// <param name="copa">Posición de la copa.</param>
     public void CalcularRuta(Punto2D posicionIncial, Punto2D copa)
     {
         moviendo = false;
@@ -158,12 +185,12 @@ public class Cedric : MonoBehaviour {
     }
 
     /// <summary>
-    /// Algoritmo de búsqueda en anchura para calcular el camino más corto hacia la copa.
+    /// Algoritmo de búsqueda en anchura para calcular el primer camino más corto hacia la copa.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="posCopaX"></param>
-    /// <param name="posCopaY"></param>
+    /// <param name="x">Posición x inicial</param>
+    /// <param name="y">Posición y inicial</param>
+    /// <param name="posCopaX">Posición x de la copa</param>
+    /// <param name="posCopaY">Posición y de la copa</param>
     private void DoBFS(int x, int y, int posCopaX, int posCopaY)
     {
         visitados = new bool[maze.n, maze.m];
@@ -189,15 +216,17 @@ public class Cedric : MonoBehaviour {
                 return;
             }
 
+            //Se recorren las 4 posibilidades a partir de una posición.
             for (int i = 0; i < 4; i++)
             {
                 int nuevoX = posActual.posicion.x + desplazamientosX[i];
                 int nuevoY = posActual.posicion.y + desplazamientosY[i];
 
-                if (nuevoX >= 0 && nuevoX < maze.n && nuevoY >= 0 && nuevoY < maze.m)
+                if (nuevoX >= 0 && nuevoX < maze.n && nuevoY >= 0 && nuevoY < maze.m) //Validamos si la nueva posicion es válida
                 {
                     //if ((maze.muros[nuevoX, nuevoY] == 0 || maze.muros[nuevoX, nuevoY] == 2) && !visitados[nuevoX, nuevoY])
-                    if ((maze.muros[nuevoX, nuevoY] != 1) && !visitados[nuevoX, nuevoY])
+
+                    if ((maze.muros[nuevoX, nuevoY] != 1) && !visitados[nuevoX, nuevoY])//Si la posición está libre y no la hemos procesado entonces la encolamos.
                     {
                         visitados[nuevoX, nuevoY] = true;
 

@@ -23,6 +23,10 @@ public class controller : MonoBehaviour {
 		Vector3 positionNueva;
         Punto2D nuevaPosMapa;
         Punto2D posActualMapa = new Punto2D((int)positionActual.x, (int)positionActual.z);
+
+        //Las teclas para mover a Harry en sus 4 coordenadas son D,A,W,S
+        //Para cada coordenada se verifica si está dentro del mapa y si existe una posición libre.
+
 		if (Input.GetKeyDown(KeyCode.D)) {
             positionNueva = new Vector3(positionActual.x + paso, positionActual.y, positionActual.z);
             nuevaPosMapa.x = (int)positionNueva.x;
